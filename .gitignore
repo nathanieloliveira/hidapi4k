@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/android,androidstudio,intellij,zig,c,git,windows,linux,macos,gradle
 # Edit at https://www.toptal.com/developers/gitignore?templates=android,androidstudio,intellij,zig,c,git,windows,linux,macos,gradle
 
+.zig-cache
+
 ### Android ###
 # Gradle files
 .gradle/
