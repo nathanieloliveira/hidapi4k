@@ -68,6 +68,7 @@ pub fn build(b: *std.Build) !void {
                 }
             });
             lib.linkSystemLibrary("user32");
+            lib.linkSystemLibrary("uuid");
         },
         .linux => {
             lib.linkLibC();
