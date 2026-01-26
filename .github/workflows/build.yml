@@ -20,6 +20,9 @@ jobs:
         working-directory: zig
         run: zig build
 
+      - name: list
+        run: dir zig/zig-out/lib
+
       - name: Archive build
         uses: actions/upload-artifact@v4
         with:
@@ -39,6 +42,9 @@ jobs:
       - name: build windows arm
         working-directory: zig
         run: zig build
+
+      - name: list
+        run: dir zig/zig-out/lib
 
       - name: Archive build
         uses: actions/upload-artifact@v4
