@@ -2,7 +2,7 @@ name: Build hidapi
 on: [ push ]
 
 jobs:
-  build-windows:
+  build-windows-x86_64:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
@@ -11,5 +11,37 @@ jobs:
       - uses: mlugg/setup-zig@v2
         with:
           version: 0.15.2
-      - working-directory: zig
+
+      - name: build windows x86_64
+        working-directory: zig
+        run: zig build -Dtarget=x86_64-windows-msvc
+
+      - name: build windows arm64
+        working-directory: zig
         run: zig build
+
+      - name: Archive build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hidapi-x86_64.dll
+          path: zig/zig-out/lib/hidapi.dll
+
+  build-windows-arm64:
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+      - uses: mlugg/setup-zig@v2
+        with:
+          version: 0.15.2
+
+      - name: build windows arm
+        working-directory: zig
+        run: zig build
+
+      - name: Archive build
+        uses: actions/upload-artifact@v4
+        with:
+          name: hidapi-aarch64.dll
+          path: zig/zig-out/lib/hidapi.dll
