@@ -41,7 +41,7 @@ jobs:
 
       - name: build windows arm
         working-directory: zig
-        run: zig build
+        run: zig build -Dtarget=aarch64-windows-msvc
 
       - name: list
         run: dir zig/zig-out/lib
