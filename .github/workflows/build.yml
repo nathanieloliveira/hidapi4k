@@ -11,4 +11,5 @@ jobs:
       - uses: mlugg/setup-zig@v2
         with:
           version: 0.15.2
-      - run: zig build --build-file zig/build.zig
+      - working-directory: zig
+        run: zig build
