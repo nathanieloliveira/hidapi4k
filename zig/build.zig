@@ -68,8 +68,9 @@ pub fn build(b: *std.Build) !void {
                     .cwd_relative = "../hidapi/windows/"
                 }
             });
-            lib.linkSystemLibrary("user32");
+            // lib.linkSystemLibrary("user32");
             lib.linkSystemLibrary("uuid");
+            // lib.linkLibC();
         },
         .linux => {
             lib.linkLibC();
