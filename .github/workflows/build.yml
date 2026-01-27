@@ -46,19 +46,15 @@ jobs:
     needs: build-natives
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
       - name: Download artifacts
+        id: download-artifacts
         uses: dawidd6/action-download-artifact@v12
         with:
           skip_unpack: true
 
-      - name: list
-        run: find .
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          files: ${{ join(steps.download-artifacts.outputs.*, '\n')} }
 
-#      - name: Release
-#        uses: softprops/action-gh-release@v2
-#        if: github.ref_type == 'tag'
-#        with:
-#          files: Release.txt
