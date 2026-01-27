@@ -5,6 +5,9 @@ on:
     tags:
       - 'natives-[0-9]+.[0-9]+.[0-9]+'
 
+permissions:
+  contents: write
+
 jobs:
   build-natives:
     strategy:
@@ -57,5 +60,5 @@ jobs:
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: ${{ join(steps.download-artifacts.outputs.*, '\n') }}
+          files: ${{ join(steps.download-artifacts.outputs.*.name, '\n') }}
 
