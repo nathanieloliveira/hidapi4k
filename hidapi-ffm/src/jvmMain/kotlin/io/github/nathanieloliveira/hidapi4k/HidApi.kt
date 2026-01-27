@@ -12,7 +12,7 @@ import java.lang.foreign.ValueLayout.JAVA_LONG
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
-object HidApiRaw {
+object HidApi {
 
     val WCHAR_CHARSET by lazy {
         val plat = SystemInfo.getCurrentPlatform()

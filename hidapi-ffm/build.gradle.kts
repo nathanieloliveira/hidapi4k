@@ -22,7 +22,7 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         jvmMain.dependencies {
-            implementation("com.github.oshi:oshi-core-java25:6.9.2")
+            implementation(libs.oshi.core.java25)
         }
     }
 }

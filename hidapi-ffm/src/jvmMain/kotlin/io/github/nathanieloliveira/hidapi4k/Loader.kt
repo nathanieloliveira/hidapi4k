@@ -6,16 +6,21 @@ import java.lang.foreign.Linker
 import java.lang.foreign.SymbolLookup
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import java.util.concurrent.atomic.AtomicBoolean
 
 object Loader {
 
+    const val HIDAPI_LIB_NAME = "hidapi"
     const val HIDAPI4K_LIBRARY_PATH = "HIDAPI4K_LIBRARY_PATH"
 
-    val dataPath: String get() = System.getProperty("hid4k.data.path") ?: "${System.getProperty("user.home")}/.hid4k/"
+    private val dataPath: String get() = System.getProperty("hidapi4k.data.path") ?: "${System.getProperty("user.home")}/.hidapi4k/"
+    private val arena = Arena.ofAuto()
+    internal val linker = Linker.nativeLinker()
 
-    val arena = Arena.ofAuto()
-    val linker = Linker.nativeLinker()
-    lateinit var lib: SymbolLookup
+    private val loaded = AtomicBoolean(false)
+    val lib by lazy {
+        loadInternal()
+    }
 
     private fun unpackIfNeeded(dest: File, resourceName: String, deleteOnExit: Boolean): File {
         val file = File(dest, resourceName)
@@ -32,23 +37,31 @@ object Loader {
         return file
     }
 
-
-    fun load() {
-        val libraryName = System.getProperty(HIDAPI4K_LIBRARY_PATH)
-        if (libraryName != null && libraryName.isNotBlank()) {
-            System.load(libraryName)
-            lib = SymbolLookup.libraryLookup(libraryName, arena)
-            return
+    private fun loadInternal(): SymbolLookup {
+        if (loaded.get()) {
+            return lib
         }
 
-        val dataDir = File(File(dataPath), "hidapi")
+        val libraryName = System.getProperty(HIDAPI4K_LIBRARY_PATH)
+        if (libraryName != null && libraryName.isNotBlank()) {
+            val lib = SymbolLookup.libraryLookup(libraryName, arena)
+            loaded.set(true)
+            return lib
+        }
+
+        val dataDir = File(File(dataPath), HIDAPI_LIB_NAME)
         dataDir.mkdirs()
 
-        val platformName = System.mapLibraryName("hidapi")
+        val platformName = System.mapLibraryName(HIDAPI_LIB_NAME)
         val library = unpackIfNeeded(dataDir, platformName, false)
-//        System.load(library.absolutePath)
 
-        lib = SymbolLookup.libraryLookup(library.absolutePath, arena)
+        val lib = SymbolLookup.libraryLookup(library.absolutePath, arena)
+        loaded.set(true)
+        return lib
+    }
+
+    fun load(): SymbolLookup {
+        return lib
     }
 
 }

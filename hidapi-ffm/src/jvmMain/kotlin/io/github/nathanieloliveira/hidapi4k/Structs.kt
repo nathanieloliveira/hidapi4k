@@ -1,6 +1,6 @@
 package io.github.nathanieloliveira.hidapi4k
 
-import io.github.nathanieloliveira.hidapi4k.HidApiRaw.readWCharString
+import io.github.nathanieloliveira.hidapi4k.HidApi.readWCharString
 import java.lang.foreign.MemoryLayout
 import java.lang.foreign.MemorySegment
 import java.lang.foreign.ValueLayout.ADDRESS
