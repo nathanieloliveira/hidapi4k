@@ -45,6 +45,7 @@ jobs:
   release-natives:
     needs: build-natives
     runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
     steps:
       - name: Download artifacts
         id: download-artifacts
