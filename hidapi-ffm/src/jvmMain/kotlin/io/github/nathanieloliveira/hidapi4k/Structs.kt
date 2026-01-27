@@ -1,9 +1,11 @@
-package com.github.nathanieloliveira.hidapi4k
+package io.github.nathanieloliveira.hidapi4k
 
-import com.github.nathanieloliveira.hidapi4k.HidApiRaw.readWCharString
+import io.github.nathanieloliveira.hidapi4k.HidApiRaw.readWCharString
 import java.lang.foreign.MemoryLayout
 import java.lang.foreign.MemorySegment
-import java.lang.foreign.ValueLayout
+import java.lang.foreign.ValueLayout.ADDRESS
+import java.lang.foreign.ValueLayout.JAVA_INT
+import java.lang.foreign.ValueLayout.JAVA_SHORT
 import java.nio.charset.StandardCharsets
 
 enum class HidBusType(val value: Int) {
@@ -26,20 +28,20 @@ class HidDeviceInfo(
 ) {
     companion object {
         val LAYOUT = MemoryLayout.structLayout(
-            ValueLayout.ADDRESS.withName("path"),
-            ValueLayout.JAVA_SHORT.withName("vendor_id"),
-            ValueLayout.JAVA_SHORT.withName("product_id"),
+            ADDRESS.withName("path"),
+            JAVA_SHORT.withName("vendor_id"),
+            JAVA_SHORT.withName("product_id"),
             MemoryLayout.paddingLayout(4),
-            ValueLayout.ADDRESS.withName("serial_number"),
+            ADDRESS.withName("serial_number"),
             MemoryLayout.paddingLayout(6),
-            ValueLayout.JAVA_SHORT.withName("release_number"),
-            ValueLayout.ADDRESS.withName("manufacturer_string"),
-            ValueLayout.ADDRESS.withName("product_string"),
-            ValueLayout.JAVA_SHORT.withName("usage_page"),
-            ValueLayout.JAVA_SHORT.withName("usage"),
-            ValueLayout.JAVA_INT.withName("interface_number"),
-            ValueLayout.ADDRESS.withName("next"),
-            ValueLayout.JAVA_INT.withName("bus_type"),
+            JAVA_SHORT.withName("release_number"),
+            ADDRESS.withName("manufacturer_string"),
+            ADDRESS.withName("product_string"),
+            JAVA_SHORT.withName("usage_page"),
+            JAVA_SHORT.withName("usage"),
+            JAVA_INT.withName("interface_number"),
+            ADDRESS.withName("next"),
+            JAVA_INT.withName("bus_type"),
         ).withName("hid_device_info")
 
         val PATH_HANDLE = LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("path"))
@@ -126,3 +128,34 @@ class HidDeviceInfo(
 
 @JvmInline
 value class HidDevice(val pointer: MemorySegment)
+
+class HidApiVersion(
+    pointer: MemorySegment,
+) {
+    companion object {
+        val LAYOUT = MemoryLayout.structLayout(
+            JAVA_INT.withName("major"),
+            JAVA_INT.withName("minor"),
+            JAVA_INT.withName("patch"),
+        )
+
+        val MAJOR_HANDLE = LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("major"))
+        val MINOR_HANDLE = LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("minor"))
+        val PATCH_HANDLE = LAYOUT.varHandle(MemoryLayout.PathElement.groupElement("patch"))
+    }
+
+    val pointer: MemorySegment = pointer.reinterpret(LAYOUT.byteSize())
+
+    val major: Int
+        get() = MAJOR_HANDLE.get(pointer, 0L) as Int
+
+    val minor: Int
+        get() = MINOR_HANDLE.get(pointer, 0L) as Int
+
+    val patch: Int
+        get() = PATCH_HANDLE.get(pointer, 0L) as Int
+
+    override fun toString(): String {
+        return "HidApiVersion(major=$major, minor=$minor, patch=$patch)"
+    }
+}

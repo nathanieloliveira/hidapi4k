@@ -1,4 +1,4 @@
-package com.github.nathanieloliveira.hidapi4k
+package io.github.nathanieloliveira.hidapi4k
 
 import java.io.File
 import java.lang.foreign.Arena
