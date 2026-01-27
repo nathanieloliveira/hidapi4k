@@ -56,12 +56,13 @@ jobs:
         with:
           skip_unpack: true
 
-      - name: Echo files
-        run: echo ${{ join(steps.download-artifacts.outputs.*.name, '\n') }}
-
       - name: Release
         uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          files: ${{ join(steps.download-artifacts.outputs.*.name, '\n') }}
+          files: |
+            hidapi-windows-latest.dll.zip
+            hidapi-windows-11-arm.dll.zip
+            hidapi-ubuntu-24.04.so.zip
+            hidapi-ubuntu-24.04-arm.so.zip
 
