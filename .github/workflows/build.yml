@@ -1,38 +1,19 @@
-name: Build hidapi
-on: [ push ]
+name: Build hidapi natives
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - natives-[0-9].[0-9].[0-9]
 
 jobs:
-  build-windows:
+  build-natives:
     strategy:
       matrix:
-        windows-arch: [ windows-latest, windows-11-arm ]
-    runs-on: ${{ matrix.windows-arch }}
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'true'
-
-      - uses: mlugg/setup-zig@v2
-        with:
-          version: 0.15.2
-
-      - name: build windows ${{ matrix.windows-arch }}
-        working-directory: zig
-        run: zig build -Doptimize=ReleaseFast
-
-      - name: Archive build
-        uses: actions/upload-artifact@v4
-        with:
-          name: hidapi-${{ matrix.windows-arch }}.dll
-          path: zig/zig-out/bin/hidapi.dll
-
-  build-linux:
-    strategy:
-      matrix:
-        arch: [ ubuntu-24.04, ubuntu-24.04-arm ]
+        arch: [ windows-latest, windows-11-arm, ubuntu-24.04, ubuntu-24.04-arm ]
     runs-on: ${{ matrix.arch }}
     steps:
       - name: Install libudev
+        if: ${{ contains(matrix.arch, 'ubuntu') }}
         run: sudo apt update && sudo apt install -y libudev-dev
 
       - uses: actions/checkout@v3
@@ -43,12 +24,20 @@ jobs:
         with:
           version: 0.15.2
 
-      - name: build linux ${{ matrix.arch }}
+      - name: build ${{ matrix.arch }}
         working-directory: zig
         run: zig build -Doptimize=ReleaseFast
 
-      - name: Archive build
+      - name: Archive Windows build
         uses: actions/upload-artifact@v4
+        if: ${{ contains(matrix.arch, 'windows') }}
+        with:
+          name: hidapi-${{ matrix.arch }}.dll
+          path: zig/zig-out/bin/hidapi.dll
+
+      - name: Archive Linux build
+        uses: actions/upload-artifact@v4
+        if: ${{ contains(matrix.arch, 'ubuntu') }}
         with:
           name: hidapi-${{ matrix.arch }}.so
           path: zig/zig-out/lib/libhidapi.so
