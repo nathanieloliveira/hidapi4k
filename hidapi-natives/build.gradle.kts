@@ -1,4 +1,5 @@
 import de.undercouch.gradle.tasks.download.Download
+import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     `java-library`
@@ -9,31 +10,64 @@ java {
 
 }
 
-val downloads = mapOf(
-    "WindowsX86_64" to "https://github.com/nathanieloliveira/hidapi4k/actions/runs/21366570135/artifacts/5260177584",
-    "WindowsArm64" to "",
-    "LinuxX86_64" to "https://github.com/nathanieloliveira/hidapi4k/actions/runs/21366570135/artifacts/5260173620",
-    "LinuxArm64" to "",
+val NATIVES_VERSION = "0.15.0"
+val BASE_URL = "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$NATIVES_VERSION/"
+
+data class PlatformNative(
+    val os: String,
+    val architecture: String,
+    val download: String,
 )
 
-downloads.forEach { (name, url) ->
-    if (url.isBlank()) {
-        return@forEach
-    }
+val downloads = listOf(
+    PlatformNative("linux", "x86_64", "hidapi-ubuntu-24.04.so.zip"),
+)
 
-    val downloadTask by tasks.register<Download>("download${name.capitalize()}") {
-        src(url)
-        dest(layout.buildDirectory.dir("downloads/$name"))
+configurations {
+    register("native") {
+        extendsFrom(configurations["runtimeClasspath"])
+    }
+}
+
+downloads.forEach { plat ->
+    val downloadUrl = "$BASE_URL/${plat.download}"
+    val suffix = "${plat.os.capitalized()}${plat.architecture.capitalized()}"
+    val resourceRootPath = "resources${suffix}"
+
+    val downloadTask by tasks.register<Download>("download${suffix}") {
+        src(downloadUrl)
+        dest(layout.buildDirectory.dir("downloads/$suffix"))
         onlyIfModified(true)
     }
 
-    val unzipTask by tasks.register<Copy>("copy${name.capitalize()}") {
-        zipTree(downloadTask.dest)
-        into(layout.buildDirectory.dir("resources/$name"))
+    val unzipTask by tasks.register<Copy>("copy${suffix}") {
+        dependsOn(downloadTask)
+        from(zipTree(downloadTask.outputs.files.singleFile))
+        into(layout.buildDirectory.dir("$resourceRootPath/hidapi4k/${plat.os}/${plat.architecture}"))
     }
 
-    tasks.named("processResources") {
+    val srcSet by sourceSets.register(suffix) {
+        this.resources.srcDir(layout.buildDirectory.dir(resourceRootPath))
+    }
+
+    val jarTask by tasks.register<Jar>("jar${suffix}") {
+        archiveClassifier.set("${plat.os}-${plat.architecture}")
+        from(srcSet.output)
+        manifest {
+
+        }
+    }
+
+    tasks.named("process${suffix}Resources") {
         dependsOn(unzipTask)
+    }
+
+    tasks.named("assemble") {
+        dependsOn(jarTask)
+    }
+
+    artifacts {
+        add("native", jarTask)
     }
 }
 

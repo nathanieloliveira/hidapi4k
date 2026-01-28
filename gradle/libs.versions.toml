@@ -7,6 +7,7 @@ kotlin = "2.3.0"
 kotlinx-coroutines = "1.10.2"
 material3 = "1.10.0-alpha05"
 oshi = "6.9.2"
+jna = "5.18.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -22,6 +23,7 @@ compose-components-resources = { module = "org.jetbrains.compose.components:comp
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 kotlinx-coroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 oshi-core-java25 = { module = "com.github.oshi:oshi-core-java25", version.ref = "oshi" }
+jna-core = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 
 [plugins]
 composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "composeHotReload" }

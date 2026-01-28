@@ -66,7 +66,7 @@ pub fn build(b: *std.Build) !void {
                 },
                 .root = .{
                     .cwd_relative = "../hidapi/windows/"
-                }
+                },
             });
             // lib.linkSystemLibrary("user32");
             lib.linkSystemLibrary("uuid");
@@ -81,6 +81,9 @@ pub fn build(b: *std.Build) !void {
                 },
                 .root = .{
                     .cwd_relative = "../hidapi/linux/"
+                },
+                .flags = &.{
+                    "-z,noexecstack"
                 }
             });
         },

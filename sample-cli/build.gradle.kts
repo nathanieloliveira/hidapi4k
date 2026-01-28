@@ -22,8 +22,8 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         jvmMain.dependencies {
-            implementation(libs.oshi.core.java25)
-            implementation(libs.jna.core)
+            implementation(project(":hidapi-ffm"))
+            implementation(project(":hidapi-natives", "native"))
         }
     }
 }

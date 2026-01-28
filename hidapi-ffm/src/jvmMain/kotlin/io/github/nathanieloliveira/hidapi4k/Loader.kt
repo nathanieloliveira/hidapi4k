@@ -1,5 +1,6 @@
 package io.github.nathanieloliveira.hidapi4k
 
+import com.sun.jna.Platform
 import java.io.File
 import java.lang.foreign.Arena
 import java.lang.foreign.Linker
@@ -22,14 +23,15 @@ object Loader {
         loadInternal()
     }
 
-    private fun unpackIfNeeded(dest: File, resourceName: String, deleteOnExit: Boolean): File {
-        val file = File(dest, resourceName)
+    private fun unpackIfNeeded(dest: File, libname: String, resourceName: String, deleteOnExit: Boolean): File {
+        val file = File(dest, libname)
         if (!file.exists()) {
             if (file.exists()) return file
-            val tempFile = File.createTempFile("skiko", "", dest)
+            val tempFile = File.createTempFile("hidapi4k", "", dest)
             if (deleteOnExit)
                 file.deleteOnExit()
-            Loader::class.java.getResourceAsStream("/$resourceName")!!.use { input ->
+            val resourceStream = Loader::class.java.getResourceAsStream("/$resourceName") ?: error("Could not unpack: $resourceName")
+            resourceStream.use { input ->
                 Files.copy(input, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
             }
             Files.move(tempFile.toPath(), file.toPath(), StandardCopyOption.ATOMIC_MOVE)
@@ -42,19 +44,31 @@ object Loader {
             return lib
         }
 
-        val libraryName = System.getProperty(HIDAPI4K_LIBRARY_PATH)
-        if (libraryName != null && libraryName.isNotBlank()) {
-            val lib = SymbolLookup.libraryLookup(libraryName, arena)
+        val libraryPath = System.getProperty(HIDAPI4K_LIBRARY_PATH)
+        if (libraryPath != null && libraryPath.isNotBlank()) {
+            val lib = SymbolLookup.libraryLookup(libraryPath, arena)
             loaded.set(true)
             return lib
         }
 
-        val dataDir = File(File(dataPath), HIDAPI_LIB_NAME)
-        dataDir.mkdirs()
+        val libraryName = System.mapLibraryName(HIDAPI_LIB_NAME)
 
-        val platformName = System.mapLibraryName(HIDAPI_LIB_NAME)
-        val library = unpackIfNeeded(dataDir, platformName, false)
+        val folder = File(dataPath)
+        folder.mkdirs()
 
+        val osName = when {
+            Platform.isWindows() -> "windows"
+            Platform.isMac() -> "macos"
+            Platform.isLinux() -> "linux"
+            else -> error("Unsupported platform: ${Platform.getOSType()}")
+        }
+        val arch = if (Platform.isARM()) {
+            "aarch64"
+        } else {
+            "x86_64"
+        }
+        val resourceName = "hidapi4k/$osName/$arch/$libraryName"
+        val library = unpackIfNeeded(folder, libraryName, resourceName, false)
         val lib = SymbolLookup.libraryLookup(library.absolutePath, arena)
         loaded.set(true)
         return lib

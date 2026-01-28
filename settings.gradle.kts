@@ -35,3 +35,4 @@ plugins {
 include(":composeApp")
 include(":hidapi-ffm")
 include(":hidapi-natives")
+include(":sample-cli")
