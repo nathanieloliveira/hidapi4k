@@ -82,9 +82,7 @@ pub fn build(b: *std.Build) !void {
                 .root = .{
                     .cwd_relative = "../hidapi/linux/"
                 },
-                .flags = &.{
-                    "-z,noexecstack"
-                }
+                .flags = &.{}
             });
         },
         .macos => {
