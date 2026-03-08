@@ -88,7 +88,20 @@ pub fn build(b: *std.Build) !void {
             });
         },
         .macos => {
-
+            lib.linkLibC();
+            lib.addIncludePath(.{
+                .cwd_relative = "../hidapi/mac/"
+            });
+            lib.addCSourceFiles(.{
+                .files = &.{
+                    "hid.c",
+                },
+                .root = .{
+                    .cwd_relative = "../hidapi/mac/"
+                },
+            });
+            lib.linkFramework("IOKit");
+            lib.linkFramework("CoreFoundation");
         },
         else => {}
     }

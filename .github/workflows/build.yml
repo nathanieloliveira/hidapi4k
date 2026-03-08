@@ -12,7 +12,7 @@ jobs:
   build-natives:
     strategy:
       matrix:
-        arch: [ windows-latest, windows-11-arm, ubuntu-24.04, ubuntu-24.04-arm ]
+        arch: [ windows-latest, windows-11-arm, ubuntu-24.04, ubuntu-24.04-arm, macos-latest, macos-13 ]
     runs-on: ${{ matrix.arch }}
     steps:
       - name: Install libudev
@@ -45,6 +45,13 @@ jobs:
           name: hidapi-${{ matrix.arch }}.so
           path: zig/zig-out/lib/libhidapi.so
 
+      - name: Archive macOS build
+        uses: actions/upload-artifact@v4
+        if: ${{ contains(matrix.arch, 'macos') }}
+        with:
+          name: hidapi-${{ matrix.arch }}.dylib
+          path: zig/zig-out/lib/libhidapi.dylib
+
   release-natives:
     needs: build-natives
     runs-on: ubuntu-latest
@@ -64,4 +71,6 @@ jobs:
             hidapi-windows-11-arm.dll.zip
             hidapi-ubuntu-24.04.so.zip
             hidapi-ubuntu-24.04-arm.so.zip
+            hidapi-macos-latest.dylib.zip
+            hidapi-macos-13.dylib.zip
 
