@@ -1,33 +1,34 @@
 package io.github.nathanieloliveira.hidapi4k
 
-import oshi.PlatformEnum
-import oshi.SystemInfo
+import com.sun.jna.Platform
 import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
 import java.lang.foreign.MemorySegment
 import java.lang.foreign.ValueLayout
-import java.lang.foreign.ValueLayout.ADDRESS
-import java.lang.foreign.ValueLayout.JAVA_INT
-import java.lang.foreign.ValueLayout.JAVA_LONG
+import java.lang.foreign.ValueLayout.*
 import java.nio.ByteOrder
 import java.nio.charset.StandardCharsets
 
 object HidApi {
 
     val WCHAR_CHARSET by lazy {
-        val plat = SystemInfo.getCurrentPlatform()
+        val osName = when {
+            Platform.isWindows() -> "windows"
+            Platform.isMac() -> "macos"
+            Platform.isLinux() -> "linux"
+            else -> error("Unsupported platform: ${Platform.getOSType()}")
+        }
         val order = ByteOrder.nativeOrder()
-        when (plat) {
-            PlatformEnum.MACOS, PlatformEnum.LINUX -> {
+        when (osName) {
+            "macos", "linux" -> {
                 if (order == ByteOrder.LITTLE_ENDIAN) {
                     StandardCharsets.UTF_32LE
                 } else {
                     StandardCharsets.UTF_32BE
                 }
             }
-
-            PlatformEnum.WINDOWS -> StandardCharsets.UTF_16LE
-            else -> error("Unsupported platform: $plat")
+            "windows" -> StandardCharsets.UTF_16LE
+            else -> error("Unsupported platform: $osName")
         }
     }
 

@@ -1,6 +1,3 @@
-import org.gradle.internal.jvm.inspection.JvmVendor
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
 }
@@ -16,7 +13,7 @@ kotlin {
     
     sourceSets {
         commonMain.dependencies {
-
+            implementation(libs.clikt)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

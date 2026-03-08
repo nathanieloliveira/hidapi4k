@@ -11,7 +11,7 @@ java {
 }
 
 val NATIVES_VERSION = "0.15.0"
-val BASE_URL = "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$NATIVES_VERSION/"
+val BASE_URL = "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$NATIVES_VERSION"
 
 data class PlatformNative(
     val os: String,
@@ -21,6 +21,9 @@ data class PlatformNative(
 
 val downloads = listOf(
     PlatformNative("linux", "x86_64", "hidapi-ubuntu-24.04.so.zip"),
+    PlatformNative("linux", "aarch64", "hidapi-ubuntu-24.04-arm.so.zip"),
+    PlatformNative("windows", "x86_64", "hidapi-windows-latest.dll.zip"),
+    PlatformNative("windows", "aarch64", "hidapi-windows-11-arm.dll.zip"),
 )
 
 configurations {

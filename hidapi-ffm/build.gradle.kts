@@ -22,7 +22,6 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         jvmMain.dependencies {
-            implementation(libs.oshi.core.java25)
             implementation(libs.jna.core)
         }
     }
