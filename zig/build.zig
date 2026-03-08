@@ -100,8 +100,9 @@ pub fn build(b: *std.Build) !void {
                 },
             });
             if (sysroot) |sr| {
-                const frameworks_path = b.pathJoin(&.{ sr, "System/Library/Frameworks" });
-                lib.addSystemFrameworkPath(.{ .cwd_relative = frameworks_path });
+                lib.addSystemFrameworkPath(.{ .cwd_relative = b.pathJoin(&.{ sr, "System/Library/Frameworks" }) });
+                lib.addSystemIncludePath(.{ .cwd_relative = b.pathJoin(&.{ sr, "usr/include" }) });
+                lib.addLibraryPath(.{ .cwd_relative = b.pathJoin(&.{ sr, "usr/lib" }) });
             }
             lib.linkFramework("IOKit");
             lib.linkFramework("CoreFoundation");
