@@ -45,9 +45,13 @@ jobs:
         with:
           version: 0.15.2
 
+      - name: Set macOS SDK sysroot
+        if: runner.os == 'macOS'
+        run: echo "MACOS_SYSROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+
       - name: build ${{ matrix.arch }}
         working-directory: zig
-        run: zig build -Doptimize=ReleaseFast ${{ matrix.zig-args }}
+        run: zig build -Doptimize=ReleaseFast ${{ matrix.zig-args }} ${{ env.MACOS_SYSROOT != '' && format('-Dsysroot={0}', env.MACOS_SYSROOT) || '' }}
 
       - name: Archive Windows build
         uses: actions/upload-artifact@v4
