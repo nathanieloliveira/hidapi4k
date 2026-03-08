@@ -12,8 +12,26 @@ jobs:
   build-natives:
     strategy:
       matrix:
-        arch: [ windows-latest, windows-11-arm, ubuntu-24.04, ubuntu-24.04-arm, macos-latest, macos-13 ]
-    runs-on: ${{ matrix.arch }}
+        include:
+          - arch: windows-latest
+            runner: windows-latest
+            zig-args: ''
+          - arch: windows-11-arm
+            runner: windows-11-arm
+            zig-args: ''
+          - arch: ubuntu-24.04
+            runner: ubuntu-24.04
+            zig-args: ''
+          - arch: ubuntu-24.04-arm
+            runner: ubuntu-24.04-arm
+            zig-args: ''
+          - arch: macos-latest
+            runner: macos-latest
+            zig-args: ''
+          - arch: macos-x86_64
+            runner: macos-latest
+            zig-args: '-Dtarget=x86_64-macos'
+    runs-on: ${{ matrix.runner }}
     steps:
       - name: Install libudev
         if: ${{ contains(matrix.arch, 'ubuntu') }}
@@ -29,7 +47,7 @@ jobs:
 
       - name: build ${{ matrix.arch }}
         working-directory: zig
-        run: zig build -Doptimize=ReleaseFast
+        run: zig build -Doptimize=ReleaseFast ${{ matrix.zig-args }}
 
       - name: Archive Windows build
         uses: actions/upload-artifact@v4
@@ -72,5 +90,5 @@ jobs:
             hidapi-ubuntu-24.04.so.zip
             hidapi-ubuntu-24.04-arm.so.zip
             hidapi-macos-latest.dylib.zip
-            hidapi-macos-13.dylib.zip
+            hidapi-macos-x86_64.dylib.zip
 
