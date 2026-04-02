@@ -1,7 +1,5 @@
-import org.gradle.internal.jvm.inspection.JvmVendor
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-
 plugins {
+    `maven-publish`
     alias(libs.plugins.kotlinMultiplatform)
 }
 
@@ -25,4 +23,8 @@ kotlin {
             implementation(libs.jna.core)
         }
     }
+}
+
+publishing {
+    publications.withType<MavenPublication>()
 }
