@@ -78,9 +78,25 @@ downloads.forEach { plat ->
     }
 }
 
+// Fat JAR with all platform natives — this becomes the default (unclassified) artifact.
+// Loader.kt uses hidapi4k/{os}/{arch}/{lib} path disambiguation, so all platforms coexist safely.
+val fatNativesJar by tasks.register<Jar>("jarAllNatives") {
+    archiveClassifier.set("")
+    downloads.forEach { plat ->
+        val suffix = "${plat.os.capitalized()}${plat.architecture.capitalized()}"
+        dependsOn("copy${suffix}")
+        from(layout.buildDirectory.dir("resources${suffix}"))
+    }
+}
+
+tasks.named("assemble") {
+    dependsOn(fatNativesJar)
+}
+
 publishing {
     publications {
         create<MavenPublication>("natives") {
+            artifact(fatNativesJar)
             downloads.forEach { plat ->
                 val suffix = "${plat.os.capitalized()}${plat.architecture.capitalized()}"
                 artifact(tasks.named<Jar>("jar${suffix}"))
