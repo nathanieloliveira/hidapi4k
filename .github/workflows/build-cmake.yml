@@ -57,7 +57,7 @@ jobs:
         if: ${{ contains(matrix.arch, 'windows') }}
         with:
           name: hidapi-${{ matrix.arch }}.dll
-          path: hidapi/build/src/windows/Release/hidapi.0.15.0.dll
+          path: hidapi/build/src/windows/Debug/hidapi.dll
 
       - name: Archive Linux build
         uses: actions/upload-artifact@v4
