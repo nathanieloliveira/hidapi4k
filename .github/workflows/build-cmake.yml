@@ -64,7 +64,7 @@ jobs:
         if: ${{ contains(matrix.arch, 'ubuntu') }}
         with:
           name: hidapi-${{ matrix.arch }}.so
-          path: hidapi/build/src/linux/libhidapi-hidapiraw.so
+          path: hidapi/build/src/linux/libhidapi-hidraw.so.0.15.0
 
       - name: Archive macOS build
         uses: actions/upload-artifact@v4
