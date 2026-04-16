@@ -5,13 +5,16 @@ import java.lang.foreign.Arena
 import java.lang.foreign.FunctionDescriptor
 import java.lang.foreign.MemorySegment
 import java.lang.foreign.ValueLayout
-import java.lang.foreign.ValueLayout.*
+import java.lang.foreign.ValueLayout.ADDRESS
+import java.lang.foreign.ValueLayout.JAVA_INT
+import java.lang.foreign.ValueLayout.JAVA_LONG
 import java.nio.ByteOrder
+import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
 
 object HidApi {
 
-    val WCHAR_CHARSET by lazy {
+    val WCHAR_CHARSET: Charset by lazy {
         val osName = when {
             Platform.isWindows() -> "windows"
             Platform.isMac() -> "macos"
@@ -27,6 +30,7 @@ object HidApi {
                     StandardCharsets.UTF_32BE
                 }
             }
+
             "windows" -> StandardCharsets.UTF_16LE
             else -> error("Unsupported platform: $osName")
         }
@@ -62,6 +66,7 @@ object HidApi {
         Loader.linker.downcallHandle(f, desc)
     }
 
+    // Native hid_open is broken on macOS for certain devices
     private val hidOpen by lazy {
         val f = Loader.lib.findOrThrow("hid_open")
         val desc = FunctionDescriptor.of(
@@ -106,7 +111,7 @@ object HidApi {
     }
 
     private val hidRead by lazy {
-        val f = Loader.lib.findOrThrow("hid_read_timeout")
+        val f = Loader.lib.findOrThrow("hid_read")
         val desc = FunctionDescriptor.of(
             JAVA_INT,
             ADDRESS,
@@ -329,7 +334,12 @@ object HidApi {
         return hidWrite.invoke(device.pointer, data, length) as Int
     }
 
-    fun hidReadTimeout(device: HidDevice, data: MemorySegment, length: Long, milliseconds: Int): Int {
+    fun hidReadTimeout(
+        device: HidDevice,
+        data: MemorySegment,
+        length: Long,
+        milliseconds: Int
+    ): Int {
         return hidReadTimeout.invoke(device.pointer, data, length, milliseconds) as Int
     }
 
@@ -383,7 +393,12 @@ object HidApi {
         return HidDeviceInfo(ptr)
     }
 
-    fun hidGetIndexedString(dev: HidDevice, stringIndex: Int, string: MemorySegment, maxlen: Long): Int {
+    fun hidGetIndexedString(
+        dev: HidDevice,
+        stringIndex: Int,
+        string: MemorySegment,
+        maxlen: Long
+    ): Int {
         return hidGetIndexedString.invoke(dev.pointer, stringIndex, string, maxlen) as Int
     }
 

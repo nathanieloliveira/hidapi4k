@@ -106,6 +106,11 @@ pub fn build(b: *std.Build) !void {
             }
             lib.linkFramework("IOKit");
             lib.linkFramework("CoreFoundation");
+            // Reserve Mach-O header pad so downstream tools (e.g. Conveyor's codesign
+            // step, install_name_tool) can inject a signature / rewrite install names
+            // without hitting "changes being made to the file will invalidate the code
+            // signature" or the "link with -headerpad" error.
+            lib.headerpad_max_install_names = true;
         },
         else => {}
     }

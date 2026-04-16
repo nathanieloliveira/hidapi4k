@@ -3,6 +3,7 @@ import org.gradle.internal.extensions.stdlib.capitalized
 
 plugins {
     `java-library`
+    `maven-publish`
     alias(libs.plugins.gradleDownloadTask)
 }
 
@@ -11,7 +12,8 @@ java {
 }
 
 val NATIVES_VERSION = "0.15.0"
-val BASE_URL = "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$NATIVES_VERSION"
+val BASE_URL =
+    "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$NATIVES_VERSION"
 
 data class PlatformNative(
     val os: String,
@@ -24,6 +26,8 @@ val downloads = listOf(
     PlatformNative("linux", "aarch64", "hidapi-ubuntu-24.04-arm.so.zip"),
     PlatformNative("windows", "x86_64", "hidapi-windows-latest.dll.zip"),
     PlatformNative("windows", "aarch64", "hidapi-windows-11-arm.dll.zip"),
+    PlatformNative("macos", "aarch64", "hidapi-macos-latest.dylib.zip"),
+    PlatformNative("macos", "x86_64", "hidapi-macos-x86_64.dylib.zip"),
 )
 
 configurations {
@@ -71,6 +75,33 @@ downloads.forEach { plat ->
 
     artifacts {
         add("native", jarTask)
+    }
+}
+
+// Fat JAR with all platform natives — this becomes the default (unclassified) artifact.
+// Loader.kt uses hidapi4k/{os}/{arch}/{lib} path disambiguation, so all platforms coexist safely.
+val fatNativesJar by tasks.register<Jar>("jarAllNatives") {
+    archiveClassifier.set("")
+    downloads.forEach { plat ->
+        val suffix = "${plat.os.capitalized()}${plat.architecture.capitalized()}"
+        dependsOn("copy${suffix}")
+        from(layout.buildDirectory.dir("resources${suffix}"))
+    }
+}
+
+tasks.named("assemble") {
+    dependsOn(fatNativesJar)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("natives") {
+            artifact(fatNativesJar)
+            downloads.forEach { plat ->
+                val suffix = "${plat.os.capitalized()}${plat.architecture.capitalized()}"
+                artifact(tasks.named<Jar>("jar${suffix}"))
+            }
+        }
     }
 }
 
