@@ -1,0 +1,98 @@
+name: Build hidapi natives using CMake
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'natives-[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+jobs:
+  build-natives:
+    strategy:
+      matrix:
+        include:
+          - arch: windows-latest
+            runner: windows-latest
+            cmake-args: ''
+          - arch: windows-11-arm
+            runner: windows-11-arm
+            cmake-args: ''
+          - arch: ubuntu-24.04
+            runner: ubuntu-24.04
+            cmake-args: ''
+          - arch: ubuntu-24.04-arm
+            runner: ubuntu-24.04-arm
+            cmake-args: ''
+          - arch: macos-latest
+            runner: macos-latest
+            cmake-args: ''
+          - arch: macos-x86_64
+            runner: macos-latest
+            cmake-args: '-DCMAKE_OSX_ARCHITECTURES=x86_64'
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Install libudev
+        if: ${{ contains(matrix.arch, 'ubuntu') }}
+        run: sudo apt update && sudo apt install -y libudev-dev
+
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - name: Set macOS SDK sysroot
+        if: runner.os == 'macOS'
+        run: echo "MACOS_SYSROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
+
+      - name: build ${{ matrix.arch }}
+        working-directory: zig
+        run: |
+          mkdir build && cd build
+          cmake ${{ matrix.cmake-args }} ..
+          cmake --build .
+          find .
+
+      - name: Archive Windows build
+        uses: actions/upload-artifact@v4
+        if: ${{ contains(matrix.arch, 'windows') }}
+        with:
+          name: hidapi-${{ matrix.arch }}.dll
+          path: build/src/windows/hidapi.0.15.0.dll
+
+      - name: Archive Linux build
+        uses: actions/upload-artifact@v4
+        if: ${{ contains(matrix.arch, 'ubuntu') }}
+        with:
+          name: hidapi-${{ matrix.arch }}.so
+          path: build/src/linux/libhidapi.0.15.0.so
+
+      - name: Archive macOS build
+        uses: actions/upload-artifact@v4
+        if: ${{ contains(matrix.arch, 'macos') }}
+        with:
+          name: hidapi-${{ matrix.arch }}.dylib
+          path: build/src/mac/libhidapi.0.15.0.dylib
+
+  release-natives:
+    needs: build-natives
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    steps:
+      - name: Download artifacts
+        id: download-artifacts
+        uses: dawidd6/action-download-artifact@v12
+        with:
+          skip_unpack: true
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            hidapi-windows-latest.dll.zip
+            hidapi-windows-11-arm.dll.zip
+            hidapi-ubuntu-24.04.so.zip
+            hidapi-ubuntu-24.04-arm.so.zip
+            hidapi-macos-latest.dylib.zip
+            hidapi-macos-x86_64.dylib.zip
+
