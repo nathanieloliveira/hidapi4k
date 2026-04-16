@@ -1,9 +1,9 @@
 name: Build hidapi natives
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - 'natives-[0-9]+.[0-9]+.[0-9]+'
+#  push:
+#    tags:
+#      - 'natives-[0-9]+.[0-9]+.[0-9]+'
 
 permissions:
   contents: write
