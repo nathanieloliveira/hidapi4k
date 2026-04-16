@@ -28,10 +28,10 @@ jobs:
             cmake-args: '-DHIDAPI_WITH_LIBUSB=FALSE'
           - arch: macos-latest
             runner: macos-latest
-            cmake-args: ''
+            cmake-args: '-DCMAKE_C_COMPILER=clang -DCMAKE_SHARED_LINKER_FLAGS=-headerpad_max_install_names'
           - arch: macos-x86_64
             runner: macos-latest
-            cmake-args: '-DCMAKE_OSX_ARCHITECTURES=x86_64'
+            cmake-args: '-DCMAKE_C_COMPILER=clang -DCMAKE_SHARED_LINKER_FLAGS=-headerpad_max_install_names -DCMAKE_OSX_ARCHITECTURES=x86_64'
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Install libudev
