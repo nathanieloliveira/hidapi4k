@@ -38,7 +38,7 @@ jobs:
         if: ${{ contains(matrix.arch, 'ubuntu') }}
         run: sudo apt update && sudo apt install -y libudev-dev
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           submodules: 'true'
 
@@ -54,21 +54,21 @@ jobs:
           cmake --build .
 
       - name: Archive Windows build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ contains(matrix.arch, 'windows') }}
         with:
           name: hidapi-${{ matrix.arch }}.dll
           path: hidapi/build/src/windows/Debug/hidapi.dll
 
       - name: Archive Linux build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ contains(matrix.arch, 'ubuntu') }}
         with:
           name: hidapi-${{ matrix.arch }}.so
           path: hidapi/build/src/linux/libhidapi-hidraw.so.0.15.0
 
       - name: Archive macOS build
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ contains(matrix.arch, 'macos') }}
         with:
           name: hidapi-${{ matrix.arch }}.dylib
@@ -85,8 +85,7 @@ jobs:
         with:
           skip_unpack: true
           run_id: ${{ github.event.workflow_run.id }}
-          name: hidapi-windows-latest.dll|hidapi-windows-11-arm.dll|hidapi-ubuntu-24.04.so|hidapi-ubuntu-24.04-arm.so|hidapi-macos-latest.dylib|hidapi-macos-x86_64.dylib
-          name_is_regex: true
+          workflow_conclusion: ""
 
       - name: Release
         uses: softprops/action-gh-release@v3
