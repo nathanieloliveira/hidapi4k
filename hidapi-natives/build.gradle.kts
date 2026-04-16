@@ -11,7 +11,7 @@ java {
 
 }
 
-val NATIVES_VERSION = "0.15.0"
+val NATIVES_VERSION = "0.15.1"
 val BASE_URL =
     "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$NATIVES_VERSION"
 
