@@ -21,10 +21,10 @@ jobs:
             cmake-args: ''
           - arch: ubuntu-24.04
             runner: ubuntu-24.04
-            cmake-args: ''
+            cmake-args: '-DHIDAPI_WITH_LIBUSB=FALSE'
           - arch: ubuntu-24.04-arm
             runner: ubuntu-24.04-arm
-            cmake-args: ''
+            cmake-args: '-DHIDAPI_WITH_LIBUSB=FALSE'
           - arch: macos-latest
             runner: macos-latest
             cmake-args: ''
