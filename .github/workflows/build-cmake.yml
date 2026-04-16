@@ -46,6 +46,7 @@ jobs:
         run: echo "MACOS_SYSROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
 
       - name: build ${{ matrix.arch }}
+        working-directory: hidapi
         run: |
           mkdir build && cd build
           cmake ${{ matrix.cmake-args }} ..
@@ -57,21 +58,21 @@ jobs:
         if: ${{ contains(matrix.arch, 'windows') }}
         with:
           name: hidapi-${{ matrix.arch }}.dll
-          path: build/src/windows/hidapi.0.15.0.dll
+          path: hidapi/build/src/windows/hidapi.0.15.0.dll
 
       - name: Archive Linux build
         uses: actions/upload-artifact@v4
         if: ${{ contains(matrix.arch, 'ubuntu') }}
         with:
           name: hidapi-${{ matrix.arch }}.so
-          path: build/src/linux/libhidapi.0.15.0.so
+          path: hidapi/build/src/linux/libhidapi.0.15.0.so
 
       - name: Archive macOS build
         uses: actions/upload-artifact@v4
         if: ${{ contains(matrix.arch, 'macos') }}
         with:
           name: hidapi-${{ matrix.arch }}.dylib
-          path: build/src/mac/libhidapi.0.15.0.dylib
+          path: hidapi/build/src/mac/libhidapi.0.15.0.dylib
 
   release-natives:
     needs: build-natives
