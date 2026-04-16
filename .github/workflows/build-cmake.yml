@@ -84,8 +84,9 @@ jobs:
         uses: dawidd6/action-download-artifact@v20
         with:
           skip_unpack: true
-          workflow: build-cmake.yml
           run_id: ${{ github.event.workflow_run.id }}
+          name: hidapi-windows-latest.dll|hidapi-windows-11-arm.dll|hidapi-ubuntu-24.04.so|hidapi-ubuntu-24.04-arm.so|hidapi-macos-latest.dylib|hidapi-macos-x86_64.dylib
+          name_is_regex: true
 
       - name: Release
         uses: softprops/action-gh-release@v3
