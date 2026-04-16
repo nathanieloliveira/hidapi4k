@@ -46,7 +46,6 @@ jobs:
         run: echo "MACOS_SYSROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "$GITHUB_ENV"
 
       - name: build ${{ matrix.arch }}
-        working-directory: zig
         run: |
           mkdir build && cd build
           cmake ${{ matrix.cmake-args }} ..
