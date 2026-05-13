@@ -11,23 +11,62 @@ java {
 
 }
 
-val NATIVES_VERSION = "0.15.1"
+val BUILD_VERSION = "0.15.11"
+val NATIVES_VERSION = "0.15.0"
 val BASE_URL =
-    "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$NATIVES_VERSION"
+    "https://github.com/nathanieloliveira/hidapi4k/releases/download/natives-$BUILD_VERSION"
 
 data class PlatformNative(
     val os: String,
     val architecture: String,
     val download: String,
+    val sourceName: String,
+    val targetName: String,
 )
 
 val downloads = listOf(
-    PlatformNative("linux", "x86_64", "hidapi-ubuntu-24.04.so.zip"),
-    PlatformNative("linux", "aarch64", "hidapi-ubuntu-24.04-arm.so.zip"),
-    PlatformNative("windows", "x86_64", "hidapi-windows-latest.dll.zip"),
-    PlatformNative("windows", "aarch64", "hidapi-windows-11-arm.dll.zip"),
-    PlatformNative("macos", "aarch64", "hidapi-macos-latest.dylib.zip"),
-    PlatformNative("macos", "x86_64", "hidapi-macos-x86_64.dylib.zip"),
+    PlatformNative(
+        "linux",
+        "x86_64",
+        "hidapi-ubuntu-24.04.so.zip",
+        "libhidapi-hidraw.so.$NATIVES_VERSION",
+        "libhidapi.so",
+    ),
+    PlatformNative(
+        "linux",
+        "aarch64",
+        "hidapi-ubuntu-24.04-arm.so.zip",
+        "libhidapi-hidraw.so.$NATIVES_VERSION",
+        "libhidapi.so",
+    ),
+    PlatformNative(
+        "windows",
+        "x86_64",
+        "hidapi-windows-latest.dll.zip",
+        "hidapi.dll",
+        "hidapi.dll",
+    ),
+    PlatformNative(
+        "windows",
+        "aarch64",
+        "hidapi-windows-11-arm.dll.zip",
+        "hidapi.dll",
+        "hidapi.dll",
+    ),
+    PlatformNative(
+        "macos",
+        "x86_64",
+        "hidapi-macos-x86_64.dylib.zip",
+        "libhidapi.$NATIVES_VERSION.dylib",
+        "libhidapi.dylib",
+    ),
+    PlatformNative(
+        "macos",
+        "aarch64",
+        "hidapi-macos-latest.dylib.zip",
+        "libhidapi.$NATIVES_VERSION.dylib",
+        "libhidapi.dylib",
+    ),
 )
 
 configurations {
@@ -41,16 +80,26 @@ downloads.forEach { plat ->
     val suffix = "${plat.os.capitalized()}${plat.architecture.capitalized()}"
     val resourceRootPath = "resources${suffix}"
 
+    val downloadFolder = layout.buildDirectory.dir("downloads/zip/$suffix")
+    val unzipFolder = layout.buildDirectory.dir("downloads/$suffix")
+
     val downloadTask by tasks.register<Download>("download${suffix}") {
         src(downloadUrl)
-        dest(layout.buildDirectory.dir("downloads/$suffix"))
+        dest(downloadFolder)
         onlyIfModified(true)
     }
 
-    val unzipTask by tasks.register<Copy>("copy${suffix}") {
+    val unzipTask by tasks.register<Copy>("unzip${suffix}") {
         dependsOn(downloadTask)
         from(zipTree(downloadTask.outputs.files.singleFile))
+        into(layout.buildDirectory.dir("downloads/$suffix"))
+    }
+
+    val copyTask by tasks.register<Copy>("copy$suffix") {
+        dependsOn(unzipTask)
+        from(file(unzipFolder).resolve(plat.sourceName))
         into(layout.buildDirectory.dir("$resourceRootPath/hidapi4k/${plat.os}/${plat.architecture}"))
+        rename { plat.targetName }
     }
 
     val srcSet by sourceSets.register(suffix) {
@@ -66,11 +115,11 @@ downloads.forEach { plat ->
     }
 
     tasks.named("process${suffix}Resources") {
-        dependsOn(unzipTask)
+        dependsOn(copyTask)
     }
 
     tasks.named("assemble") {
-        dependsOn(jarTask)
+        dependsOn(copyTask, jarTask)
     }
 
     artifacts {
