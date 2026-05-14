@@ -28,42 +28,42 @@ val downloads = listOf(
     PlatformNative(
         "linux",
         "x86_64",
-        "hidapi-ubuntu-24.04.so.zip",
+        "$BASE_URL/hidapi-ubuntu-24.04.so.zip",
         "libhidapi-hidraw.so.$NATIVES_VERSION",
         "libhidapi.so",
     ),
     PlatformNative(
         "linux",
         "aarch64",
-        "hidapi-ubuntu-24.04-arm.so.zip",
+        "$BASE_URL/hidapi-ubuntu-24.04-arm.so.zip",
         "libhidapi-hidraw.so.$NATIVES_VERSION",
         "libhidapi.so",
     ),
     PlatformNative(
         "windows",
         "x86_64",
-        "hidapi-windows-latest.dll.zip",
-        "hidapi.dll",
+        "https://github.com/libusb/hidapi/releases/download/hidapi-$NATIVES_VERSION/hidapi-win.zip",
+        "x64/hidapi.dll",
         "hidapi.dll",
     ),
     PlatformNative(
         "windows",
         "aarch64",
-        "hidapi-windows-11-arm.dll.zip",
+        "$BASE_URL/hidapi-windows-11-arm.dll.zip",
         "hidapi.dll",
         "hidapi.dll",
     ),
     PlatformNative(
         "macos",
         "x86_64",
-        "hidapi-macos-x86_64.dylib.zip",
+        "$BASE_URL/hidapi-macos-x86_64.dylib.zip",
         "libhidapi.$NATIVES_VERSION.dylib",
         "libhidapi.dylib",
     ),
     PlatformNative(
         "macos",
         "aarch64",
-        "hidapi-macos-latest.dylib.zip",
+        "$BASE_URL/hidapi-macos-latest.dylib.zip",
         "libhidapi.$NATIVES_VERSION.dylib",
         "libhidapi.dylib",
     ),
@@ -76,7 +76,7 @@ configurations {
 }
 
 downloads.forEach { plat ->
-    val downloadUrl = "$BASE_URL/${plat.download}"
+    val downloadUrl = plat.download
     val suffix = "${plat.os.capitalized()}${plat.architecture.capitalized()}"
     val resourceRootPath = "resources${suffix}"
 

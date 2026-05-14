@@ -44,7 +44,7 @@ object Loader {
             return lib
         }
 
-        val libraryPath = System.getProperty(HIDAPI4K_LIBRARY_PATH)
+        val libraryPath = System.getenv(HIDAPI4K_LIBRARY_PATH)
         if (libraryPath != null && libraryPath.isNotBlank()) {
             val lib = SymbolLookup.libraryLookup(libraryPath, arena)
             loaded.set(true)
